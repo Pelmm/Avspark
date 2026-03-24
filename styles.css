@@ -16,6 +16,13 @@ body {
     transition: color 0.2s;
 }
 
+.navbar .navbar-link {
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+    font-weight: 700 
+}
+
+
 .navbar .nav-link:hover {
     color: var(--accent-color) !important;
 }
