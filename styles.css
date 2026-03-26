@@ -129,6 +129,9 @@ body {
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 3px solid #eee;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
 }
 
 .sidebar-article:last-child {
