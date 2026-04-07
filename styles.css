@@ -12,14 +12,12 @@ body {
     background-color: var(--primary-color) !important;
 }
 
-.navbar .nav-link {
-    transition: color 0.2s;
-}
 
 .navbar .nav-link {
     font-family: 'Oswald', sans-serif;
     letter-spacing: 1px;
-    font-weight: 700 
+    font-weight: 700;
+    transition: color 0.2s;
 }
 
 
