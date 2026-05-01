@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,127 +11,132 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- NAVBAR -->
+
+    <!-- ===================== NAVBAR ===================== -->
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container">
             <a class="navbar-brand" href="#">
-        ⚽ Robins<span>Avspark</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link active fw-bold" href="#">Hem</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-bold" href="#">Champions League</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-bold" href="#">Allsvenskan</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-bold" href="#">Premier League</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-bold" href="#">La Liga</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-bold" href="#">Serie A</a>
-                </li>
+                ⚽ Robins<span>Avspark</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active fw-bold" href="#">Hem</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" href="#">Champions League</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" href="#">Allsvenskan</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" href="#">Premier League</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" href="#">La Liga</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" href="#">Serie A</a></li>
                 </ul>
                 <form class="d-flex ms-lg-3" role="search">
                     <div class="input-group">
-                    <input class="form-control" type="search" placeholder="Sök" aria-label="Sök">
-                    <button class="btn btn-outline-success ms-2" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button> 
+                        <input class="form-control" type="search" placeholder="Sök" aria-label="Sök">
+                        <button class="btn btn-outline-success ms-2" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </nav>
 
-    <!-- MAIN CONTENT -->
+    <!-- ===================== TOAST ===================== -->
+    <!-- Toast är ett litet popup-meddelande som visas tillfälligt -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="liveToast" class="toast align-items-center text-white border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toast-message"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: Skapa ny artikel ===================== -->
+    <div class="modal fade" id="articleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Skapa ny artikel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Titel -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Titel *</label>
+                        <input type="text" class="form-control" id="input-title" placeholder="Artikelns rubrik...">
+                    </div>
+                    <!-- Kategori -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Kategori *</label>
+                        <select class="form-select" id="input-category">
+                            <option value="Senaste Nytt">Senaste Nytt</option>
+                            <option value="Premier League">Premier League</option>
+                            <option value="Champions League">Champions League</option>
+                            <option value="La Liga">La Liga</option>
+                            <option value="Serie A">Serie A</option>
+                            <option value="Allsvenskan">Allsvenskan</option>
+                        </select>
+                    </div>
+                    <!-- Innehåll -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Innehåll *</label>
+                        <textarea class="form-control" id="input-content" rows="5" placeholder="Skriv artikelns innehåll här..."></textarea>
+                    </div>
+                    <!-- Författare -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Författare</label>
+                        <input type="text" class="form-control" id="input-author" placeholder="Ditt namn...">
+                    </div>
+                    <!-- Datum — lämnas tomt används dagens datum automatiskt -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Datum <span class="text-muted fw-normal">(lämna tomt för dagens datum)</span></label>
+                        <input type="date" class="form-control" id="input-date">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+                    <!-- Anropar createArticle() i script.js -->
+                    <button type="button" class="btn btn-success" onclick="createArticle()">
+                        <i class="bi bi-plus-circle me-1"></i> Publicera
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
     <main class="container py-4">
         <div class="row">
-            <!-- ARTICLES SECTION -->
-             <div class="col-lg-8">
-                <!-- FEATURED ARTICLE -->
-                <article class="main-article">
-                    <img src="assets/united.avif" alt="Featured Article">
-                    <div class="main-article-content">
-                        <span class="category-badge">Senaste Nytt</span>
-                        <h2 class="mt-3">Manchester United vinner Champions League</h2>
-                        <div class="article-meta">
-                            <i class="bi bi-person me-1"></i> John Doe
-                            <span class="mx-2">|</span>
-                            <i class="bi bi-calendar me-1"></i> Augusti 15, 2026
-                            <span class="mx-2">|</span>
-                            <i class="bi bi-chat me-1"></i> 25 Kommentarer
-                        </div>
-                        <p class="mt-3">Manchester United har vunnit Champions League efter en dramatisk final mot Real Madrid. Matchen avgjordes i förlängningen där Uniteds stjärnspelare gjorde det avgörande målet.</p>
-                        <a href="#" class="btn btn-dark">Läs Mer <i class="bi bi-arrow-right ms-1"></i></a>
-                    </div>
-                </article>
 
-                <!-- ARTICLE GRID -->
-                 <div class="row">
-                    <div class="col-md-6">
-                        <article class="article-card">
-                            <img src="assets/liverpool.avif" alt="Article">
-                            <div class="article-card-body">
-                                    <span class="category-badge">Premier League</span>
-                                    <h5 class="mt-2">Liverpool förlorar mot Chelsea</h5>
-                                    <p class="article-meta mb-0">
-                                        <i class="bi bi-clock me-1"></i> 2 timmar sedan
-                                    </p>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="col-md-6">
-                        <article class="article-card">
-                            <img src="assets/barca.avif" alt="Article">
-                            <div class="article-card-body">
-                                    <span class="category-badge">La Liga</span>
-                                    <h5 class="mt-2">Barcelona värvar ny stjärna</h5>
-                                    <p class="article-meta mb-0">
-                                        <i class="bi bi-clock me-1"></i> 4 timmar sedan
-                                    </p>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="col-md-6">
-                        <article class="article-card">
-                            <img src="assets/juve.avif" alt="Article">
-                            <div class="article-card-body">
-                                    <span class="category-badge">Serie A</span>
-                                    <h5 class="mt-2">Juventus vinner mot Inter</h5>
-                                    <p class="article-meta mb-0">
-                                        <i class="bi bi-clock me-1"></i> 6 timmar sedan
-                                    </p>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="col-md-6">
-                        <article class="article-card">
-                            <img src="assets/psg.avif" alt="Article">
-                            <div class="article-card-body">
-                                    <span class="category-badge">Champions League</span>
-                                    <h5 class="mt-2">PSG förlorar mot Bayern</h5>
-                                    <p class="article-meta mb-0">
-                                        <i class="bi bi-clock me-1"></i> 8 timmar sedan
-                                    </p>
-                            </div>
-                        </article>
-                    </div>
-                </div> 
+            <!-- ARTIKLAR (vänster kolumn) -->
+            <div class="col-lg-8">
+
+                <!-- Rubrik och knapp för att öppna modal -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-newspaper me-2"></i>Senaste nyheterna</h4>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#articleModal">
+                        <i class="bi bi-plus-circle me-1"></i> Ny artikel
+                    </button>
+                </div>
+
+                <!-- Den senaste artikeln visas stort här (huvud-artikel) -->
+                <div id="featured-article"></div>
+
+                <!-- Övriga artiklar visas som kort i ett grid -->
+                <div class="row" id="article-grid"></div>
+
+                <!-- Visas endast om det inte finns några artiklar -->
+                <div id="no-articles-msg" class="text-center py-5 text-muted" style="display:none;">
+                    <i class="bi bi-newspaper" style="font-size:3rem;"></i>
+                    <p class="mt-3 fs-5">Inga artiklar ännu — skapa den första!</p>
+                </div>
             </div>
 
-            <!-- SIDEBAR -->
-             <div class="col-lg-4">
-                <!-- Populära Artiklar -->
+            <!-- SIDEBAR (höger kolumn) -->
+            <div class="col-lg-4">
+                <!-- Just Nu -->
                 <aside class="sidebar">
                     <h4 class="sidebar-title"><i class="bi bi-fire me-2"></i> Just Nu</h4>
                     <a href="#" class="sidebar-article">
@@ -141,7 +146,6 @@
                             <small><i class="bi bi-clock me-1"></i> 1 timme sedan</small>
                         </div>
                     </a>
-
                     <a href="#" class="sidebar-article">
                         <img src="assets/aik.png" alt="Trending">
                         <div>
@@ -149,34 +153,31 @@
                             <small><i class="bi bi-clock me-1"></i> 2 timmar sedan</small>
                         </div>
                     </a>
-
-                        <a href="#" class="sidebar-article">
-                            <img src="assets/hammarby.png" alt="Trending">
-                            <div>
-                                <h6>Hammarby vinner mot Djurgården</h6>
-                                <small><i class="bi bi-clock me-1"></i> 3 timmar sedan</small>
-                            </div>
-                        </a>
-                    
-                        <a href="#" class="sidebar-article">
-                            <img src="assets/aik.png" alt="Trending">
-                            <div>
-                                <h6>AIK värvar ny tränare</h6>
-                                <small><i class="bi bi-clock me-1"></i> 4 timmar sedan</small>
-                            </div>
-                        </a>
-
-                        <a href="#" class="sidebar-article">
-                            <img src="assets/göteborg.png" alt="Trending">
-                            <div>
-                                <h6>Göteborg får kvala sig kvar</h6>
-                                <small><i class="bi bi-clock me-1"></i> 5 timmar sedan</small>
-                            </div>
-                        </a>
+                    <a href="#" class="sidebar-article">
+                        <img src="assets/hammarby.png" alt="Trending">
+                        <div>
+                            <h6>Hammarby vinner mot Djurgården</h6>
+                            <small><i class="bi bi-clock me-1"></i> 3 timmar sedan</small>
+                        </div>
+                    </a>
+                    <a href="#" class="sidebar-article">
+                        <img src="assets/aik.png" alt="Trending">
+                        <div>
+                            <h6>AIK värvar ny tränare</h6>
+                            <small><i class="bi bi-clock me-1"></i> 4 timmar sedan</small>
+                        </div>
+                    </a>
+                    <a href="#" class="sidebar-article">
+                        <img src="assets/göteborg.png" alt="Trending">
+                        <div>
+                            <h6>Göteborg får kvala sig kvar</h6>
+                            <small><i class="bi bi-clock me-1"></i> 5 timmar sedan</small>
+                        </div>
+                    </a>
                 </aside>
-                
-                <!-- KATEGORIER -->
-                 <aside class="sidebar">
+
+                <!-- Kategorier -->
+                <aside class="sidebar">
                     <h4 class="sidebar-title"><i class="bi bi-folder me-2"></i> Kategorier</h4>
                     <div class="d-flex flex-wrap gap-2">
                         <a href="#" class="btn btn-outline-secondary btn-sm">Champions League</a>
@@ -185,25 +186,23 @@
                         <a href="#" class="btn btn-outline-secondary btn-sm">Serie A</a>
                         <a href="#" class="btn btn-outline-secondary btn-sm">Allsvenskan</a>
                     </div>
-                 </aside>
+                </aside>
 
-                 <!-- NYHETSBREV -->
-                  <aside class="sidebar">
+                <!-- Nyhetsbrev -->
+                <aside class="sidebar">
                     <h4 class="sidebar-title"><i class="bi bi-envelope me-2"></i> Nyhetsbrev</h4>
-                    <p class="text-muted small">Prenumerera på vår nyhetsbrev och få de senaste sportnyheterna direkt i din inbox.</p>
-                    <form>
-                        <div class="mb-3">
-                            <input type="email" class="form-control" placeholder="Din email">
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Prenumerera</button>
-                    </form>
-                  </aside>
+                    <p class="text-muted small">Prenumerera på vårt nyhetsbrev och få de senaste sportnyheterna direkt i din inbox.</p>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" placeholder="Din email">
+                    </div>
+                    <button type="button" class="btn btn-primary w-100">Prenumerera</button>
+                </aside>
             </div>
         </div>
     </main>
 
-    <!-- FOOTER -->
-     <footer>
+    <!-- ===================== FOOTER ===================== -->
+    <footer>
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
@@ -251,6 +250,8 @@
             </div>
         </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
