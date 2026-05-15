@@ -14,57 +14,65 @@ function saveArticles(articles) {
     localStorage.setItem("avspark-articles", JSON.stringify(articles));
 }
 
+// SKYDDAR MOT XSS GENOM ATT ERSÄTTA FARLIGA TECKEN
+// Skapar ett temporärt element, sätter texten med textContent (säkert)
+// och hämtar sedan tillbaka den som HTML med specialtecken escapade
+function sanitize(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 // SKAPA ARTIKEL
 function createArticle() {
-    const title = document.getElementById("input-title").value.trim();
-    const category = document.getElementById("input-category").value.trim();
-    const content = document.getElementById("input-content").value.trim();
-    const author = document.getElementById("input-author").value.trim() || "Redaktionen"; // Om ingen författare anges, sätt "Redaktionen"
-    const image = document.getElementById("input-image").value.trim(); // HÄMTA BILD-URL, OM INGEN URL ANGS SÅ KOMMER INGEN BILD ATT VISAS
+    const title    = document.getElementById("input-title").value.trim();
+    const category = document.getElementById("input-category").value;
+    const content  = document.getElementById("input-content").value.trim();
+    const author   = document.getElementById("input-author").value.trim() || "Redaktionen";
+    const image    = document.getElementById("input-image").value.trim();
 
+    // HÄMTA DATUM FRÅN DATUMFÄLTET, OM INGET DATUM VÄLJS ANVÄNDS DAGENS DATUM AUTOMATISKT
+    const dateInput = document.getElementById("input-date").value;
+    const date = dateInput
+        ? new Date(dateInput).toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" })
+        : new Date().toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" });
 
-// HÄMTA DATUM FRÅN DATUMFÄLTET, OM INGET DATUM VÄLJS ANVÄNDS DAGENS DATUM AUTOMATISKT
-const dateInput = document.getElementById("input-date").value;
-const date = dateInput
-    ? new Date(dateInput).toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" })
-    : new Date().toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" });
+    // VALIDERING AV INMATNINGAR
+    if (!title || !content) {
+        showToast("Fyll i titel och innehåll för att skapa en artikel.", "danger");
+        return;
+    }
 
-// VALIDERING AV INMATNINGAR
-if (!title || !content) {
-    showToast("Fyll i titel och innehåll för att skapa en artikel.", "danger");
-    return;
-}
+    // SKAPA ARTIKEL OBJEKT
+    const article = {
+        id: Date.now(),
+        title: title,
+        category: category,
+        content: content,
+        author: author,
+        date: date,
+        image: image
+    };
 
-// SKAPA ARTIKEL OBJEKT
-const article = {
-    id: Date.now(), // Unikt ID baserat på tidsstämpel
-    title: title,
-    category: category,
-    content: content,
-    author: author,
-    date: date,
-    image: image
-}
+    // LÄGG TILL DEN NYA ARTIKELN I LISTAN OCH SPARA
+    const articles = getArticles();
+    articles.unshift(article);
+    saveArticles(articles);
 
-// LÄGG TILL DEN NYA ARTIKELN I LISTAN OCH SPARA
-const articles = getArticles();
-articles.unshift(article); // Lägg till i början av arrayen så att nyaste artikeln visas först
-saveArticles(articles);
+    // STÄNG MODALEN
+    const modal = bootstrap.Modal.getInstance(document.getElementById("articleModal"));
+    modal.hide();
 
-// STÄNG MODALEN
-const modal = bootstrap.Modal.getInstance(document.getElementById("articleModal"));
-modal.hide();
+    // RENSA FORMULÄRFÄLTEN TILL NÄSTA GÅNG
+    document.getElementById("input-title").value   = "";
+    document.getElementById("input-content").value = "";
+    document.getElementById("input-author").value  = "";
+    document.getElementById("input-date").value    = "";
+    document.getElementById("input-image").value   = "";
 
-// RENSA FORMULÄRFÄLTEN TILL NÄSTA GÅNG
-document.getElementById("input-title").value = "";
-document.getElementById("input-content").value = "";
-document.getElementById("input-author").value = "";
-document.getElementById("input-date").value = ""; //  RENSA DATUMFÄLTET
-document.getElementById("input-image").value = ""; // RENSA BILD-URL FÄLTET
-
-// UPPDATERA SIDAN OCH VISA EN TOAST
-renderArticles();
-showToast("Artikel skapad!", "success");
+    // UPPDATERA SIDAN OCH VISA EN TOAST
+    renderArticles();
+    showToast("Artikel skapad!", "success");
 }
 
 // RADERA ARTIKEL
@@ -79,14 +87,14 @@ function deleteArticle(id) {
 
 // RENDERA ARTIKLAR
 function renderArticles() {
-    const articles = getArticles();
+    const articles          = getArticles();
     const featuredContainer = document.getElementById("featured-article");
-    const gridContainer = document.getElementById("article-grid");
-    const noArticleMsg = document.getElementById("no-articles-msg");
+    const gridContainer     = document.getElementById("article-grid");
+    const noArticleMsg      = document.getElementById("no-articles-msg");
 
     // RENSA INNEHÅLL
     featuredContainer.innerHTML = "";
-    gridContainer.innerHTML = "";
+    gridContainer.innerHTML     = "";
 
     // VISA MEDDELANDE OM INGA ARTIKLAR FINNS
     if (articles.length === 0) {
@@ -96,8 +104,7 @@ function renderArticles() {
     noArticleMsg.style.display = "none";
 
     // VISA DEN NYASTE ARTIKELN SOM HUVUD ARTIKEL
-    const featured = articles[0];
-    featuredContainer.innerHTML = createArticleHTML(featured);
+    featuredContainer.innerHTML = createArticleHTML(articles[0]);
 
     // VISA RESTEN AV ARTIKLARNA I GRID
     for (let i = 1; i < articles.length; i++) {
@@ -108,25 +115,27 @@ function renderArticles() {
     }
 }
 
-    // SKAPA HTML FÖR HUVUD ARTIKEL
-    function createArticleHTML(article) {
-        // VISA MAX 60 TECKEN AV INNEHÅLLET I FÖRHANDSVISNINGEN
-        const shortContent = article.content.length > 60 ? article.content.substring(0, 60) + "..." : article.content;
+// SKAPA HTML FÖR HUVUD ARTIKEL
+// sanitize() används på all användardata för att skydda mot XSS
+function createArticleHTML(article) {
+    // VISA MAX 60 TECKEN AV INNEHÅLLET I FÖRHANDSVISNINGEN
+    const shortContent = article.content.length > 60
+        ? article.content.substring(0, 60) + "..."
+        : article.content;
 
-        return `
+    return `
         <article class="main-article">
-            ${article.image ? `<img src="${article.image}" alt="${article.title}">` : ""}
+            ${article.image ? `<img src="${sanitize(article.image)}" alt="${sanitize(article.title)}">` : ""}
             <div class="main-article-content">
-                <span class="category-badge">${article.category}</span>
-                <h2 class="mt-3">${article.title}</h2>
+                <span class="category-badge">${sanitize(article.category)}</span>
+                <h2 class="mt-3">${sanitize(article.title)}</h2>
                 <div class="article-meta">
-                    <i class="bi bi-person me-1"></i> ${article.author}
+                    <i class="bi bi-person me-1"></i> ${sanitize(article.author)}
                     <span class="mx-2">|</span>
-                    <i class="bi bi-calendar me-1"></i> ${article.date}
+                    <i class="bi bi-calendar me-1"></i> ${sanitize(article.date)}
                 </div>
-                <p class="mt-3">${shortContent}</p>
+                <p class="mt-3">${sanitize(shortContent)}</p>
                 <div class="d-flex gap-2">
-                    <!-- Klicka för att gå till artikelsidan -->
                     <a href="article.html?id=${article.id}" class="btn btn-dark">
                         Läs Mer <i class="bi bi-arrow-right ms-1"></i>
                     </a>
@@ -139,26 +148,27 @@ function renderArticles() {
     `;
 }
 
-    // SKAPA HTML FÖR KORT I GRID
-    function createCardHTML(article) {
-        const shortContent = article.content.length > 60 ? article.content.substring(0, 60) + "..." : article.content;
+// SKAPA HTML FÖR KORT I GRID
+// sanitize() används på all användardata för att skydda mot XSS
+function createCardHTML(article) {
+    const shortContent = article.content.length > 60
+        ? article.content.substring(0, 60) + "..."
+        : article.content;
 
-        return `
+    return `
         <article class="article-card">
-            ${article.image ? `<img src="${article.image}" alt="${article.title}">` : ""}
+            ${article.image ? `<img src="${sanitize(article.image)}" alt="${sanitize(article.title)}">` : ""}
             <div class="article-card-body">
-                <span class="category-badge">${article.category}</span>
-                <h5 class="mt-2">${article.title}</h5>
-                <p class="text-muted small">${shortContent}</p>
+                <span class="category-badge">${sanitize(article.category)}</span>
+                <h5 class="mt-2">${sanitize(article.title)}</h5>
+                <p class="text-muted small">${sanitize(shortContent)}</p>
                 <p class="article-meta mb-2">
-                    <i class="bi bi-calendar me-1"></i> ${article.date}
+                    <i class="bi bi-calendar me-1"></i> ${sanitize(article.date)}
                 </p>
                 <div class="d-flex gap-2">
-                    <!-- Länk till full artikel -->
                     <a href="article.html?id=${article.id}" class="btn btn-sm btn-dark">
                         Läs Mer <i class="bi bi-arrow-right ms-1"></i>
                     </a>
-                    <!-- Raderingsknapp -->
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteArticle(${article.id})">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -170,19 +180,16 @@ function renderArticles() {
 
 // VISA TOAST-MEDDELANDE
 function showToast(message, typ) {
-    const toastEl = document.getElementById("liveToast");
+    const toastEl  = document.getElementById("liveToast");
     const toastMsg = document.getElementById("toast-message");
 
-    // SÄTT MEDDELANDETEXT
     toastMsg.textContent = message;
 
-    // ANPASSA TOASTENS UTSEENDE BASERAT PÅ TYP
     toastEl.className = "toast align-items-center text-white border-0";
     if (typ === "success") toastEl.classList.add("bg-success");
-    if (typ === "danger") toastEl.classList.add("bg-danger");
+    if (typ === "danger")  toastEl.classList.add("bg-danger");
     if (typ === "warning") toastEl.classList.add("bg-warning", "text-dark");
 
-    // VISA TOASTEN
     const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
     toast.show();
 }
