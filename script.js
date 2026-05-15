@@ -20,6 +20,7 @@ function createArticle() {
     const category = document.getElementById("input-category").value.trim();
     const content = document.getElementById("input-content").value.trim();
     const author = document.getElementById("input-author").value.trim() || "Redaktionen"; // Om ingen författare anges, sätt "Redaktionen"
+    const image = document.getElementById("input-image").value.trim(); // HÄMTA BILD-URL, OM INGEN URL ANGS SÅ KOMMER INGEN BILD ATT VISAS
 
 
 // HÄMTA DATUM FRÅN DATUMFÄLTET, OM INGET DATUM VÄLJS ANVÄNDS DAGENS DATUM AUTOMATISKT
@@ -42,6 +43,7 @@ const article = {
     content: content,
     author: author,
     date: date,
+    image: image
 }
 
 // LÄGG TILL DEN NYA ARTIKELN I LISTAN OCH SPARA
@@ -58,6 +60,7 @@ document.getElementById("input-title").value = "";
 document.getElementById("input-content").value = "";
 document.getElementById("input-author").value = "";
 document.getElementById("input-date").value = ""; //  RENSA DATUMFÄLTET
+document.getElementById("input-image").value = ""; // RENSA BILD-URL FÄLTET
 
 // UPPDATERA SIDAN OCH VISA EN TOAST
 renderArticles();
@@ -112,6 +115,7 @@ function renderArticles() {
 
         return `
         <article class="main-article">
+            ${article.image ? `<img src="${article.image}" alt="${article.title}">` : ""}
             <div class="main-article-content">
                 <span class="category-badge">${article.category}</span>
                 <h2 class="mt-3">${article.title}</h2>
@@ -141,6 +145,7 @@ function renderArticles() {
 
         return `
         <article class="article-card">
+            ${article.image ? `<img src="${article.image}" alt="${article.title}">` : ""}
             <div class="article-card-body">
                 <span class="category-badge">${article.category}</span>
                 <h5 class="mt-2">${article.title}</h5>
